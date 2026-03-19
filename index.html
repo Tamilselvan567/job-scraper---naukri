@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Scraper Web App</title>
+    <!-- Link to the CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        
+        <!-- Header Section -->
+        <header>
+            <h1>🔍 Job Scraper</h1>
+            <p>Scrape jobs directly from Naukri.com to find your next opportunity.</p>
+        </header>
+
+        <!-- Flash Messages -->
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Search Form -->
+        <section class="search-section">
+            <form action="/" method="POST" class="search-form" id="scrapeForm">
+                <div class="form-group">
+                    <label for="role">Job Role</label>
+                    <input type="text" id="role" name="role" placeholder="e.g., Data Scientist" required>
+                </div>
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" name="location" placeholder="e.g., Chennai" required>
+                </div>
+                <div class="form-group">
+                    <label for="max_jobs">Max Jobs Limit</label>
+                    <input type="number" id="max_jobs" name="max_jobs" value="50" min="1" max="500">
+                </div>
+                <!-- Submit Button -->
+                <button type="submit" class="btn primary-btn" id="submitBtn">
+                    <span id="btnText">Scrape Jobs</span>
+                    <span id="loader" class="loader" style="display: none;"></span>
+                </button>
+            </form>
+        </section>
+
+        <!-- Action / Download Section -->
+        {% if jobs %}
+        <section class="action-section">
+            <div class="results-header">
+                <h2>Results Found: {{ jobs|length }}</h2>
+                <a href="/download" class="btn secondary-btn">📥 Download as CSV</a>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Job Results Listing -->
+        <section class="results-section">
+            {% if jobs %}
+                <div class="jobs-grid">
+                    {% for job in jobs %}
+                    <div class="job-card">
+                        <h3 class="job-title">{{ job.Title }}</h3>
+                        <div class="job-company">💼 {{ job.Company }}</div>
+                        <div class="job-location">📍 {{ job.Location }}</div>
+                        <a href="{{ job.Link }}" target="_blank" rel="noopener noreferrer" class="btn apply-btn">Apply Now ↗</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <p>No job results yet. Please perform a search to see listings here.</p>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+
+    <!-- Script to show loading state -->
+    <script>
+        const formElement = document.getElementById('scrapeForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const loader = document.getElementById('loader');
+
+        formElement.addEventListener('submit', function() {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.7';
+            submitBtn.style.cursor = 'wait';
+            btnText.textContent = 'Scraping... Please wait.';
+            loader.style.display = 'inline-block';
+        });
+    </script>
+</body>
+</html>
